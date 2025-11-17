@@ -382,6 +382,17 @@
       text-decoration-style: dotted;
     }
 
+    .btn-danger {
+      border: none;
+      background: transparent;
+      color: #f97373;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+
     .badge-mini {
       font-size: 0.7rem;
       color: var(--text-muted);
@@ -808,6 +819,18 @@
           });
           leftActions.appendChild(fileBtn);
         }
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn-danger";
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.addEventListener("click", (evt) => {
+          evt.stopPropagation();
+          resources = resources.filter((r) => r.id !== item.id);
+          saveResources(resources);
+          renderResources();
+        });
+        leftActions.appendChild(deleteBtn);
 
         actions.appendChild(leftActions);
 

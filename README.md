@@ -1,36 +1,20 @@
-# MapOps Resource Hub (Links + Files)
+# MapOps Resource Hub (Links + Files + Delete)
 
-This version of the MapOps Hub lets you save:
+This version lets you:
 
-- Name
-- Category
-- Optional URL
-- Optional file from your laptop (PDFs, small decks, etc.)
+- Save a resource with:
+  - Name
+  - Category
+  - Optional URL
+  - Optional file from your laptop
+- Open links or files with one click
+- **Delete** individual items from the hub
 
-Each card can be:
+Everything is stored locally in your browser with `localStorage` (including file contents as data URLs), so this is a personal cockpit, not cloud backup.
 
-- Link only
-- File only
-- Link + file
+To delete an item, click the **Delete** button on its card.
 
-Everything is stored locally in your browser using `localStorage`, including the file contents (as data URLs). This is a convenience hub, not cloud backup, so keep attached files reasonably small and important.
-
-## How to use
-
-1. Open `index.html` in your browser.
-2. Use the form on the right:
-   - Name (required)
-   - URL or path (optional)
-   - Category
-   - Attach file (optional)
-3. Click **Add to hub**.
-4. In the cards list:
-   - **Open link** opens the URL in a new tab
-   - **Open file** downloads or opens the attached file
-
-## GitHub Pages
-
-1. Create a repo (for example `mapops-hub`).
-2. Add `index.html` to the root and commit.
-3. Settings → Pages → Source: Deploy from branch → `main` → `/ (root)`.
-4. Save. GitHub will give you a public URL for your hub.
+GitHub Pages usage is the same:
+- Add `index.html` to a repo
+- Turn on Pages
+- Use the generated URL as your MapOps internal hub.
