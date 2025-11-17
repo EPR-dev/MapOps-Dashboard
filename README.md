@@ -1,34 +1,36 @@
-# MapOps Resource Hub
+# MapOps Resource Hub (Links + Files)
 
-Single page internal hub for your MapOps tools, links, scripts, maps, prompts, and outbound assets.
+This version of the MapOps Hub lets you save:
 
-This repo contains a single file:
+- Name
+- Category
+- Optional URL
+- Optional file from your laptop (PDFs, small decks, etc.)
 
-- `index.html` – the entire dashboard (HTML, CSS, and JavaScript in one place)
+Each card can be:
 
-## How to run locally
+- Link only
+- File only
+- Link + file
 
-1. Download `index.html`.
-2. Open it in your browser by double clicking the file.
-3. Add your links on the right side form.
-4. All resources are stored locally in your browser using `localStorage`.
+Everything is stored locally in your browser using `localStorage`, including the file contents (as data URLs). This is a convenience hub, not cloud backup, so keep attached files reasonably small and important.
 
-## How to deploy to GitHub Pages
+## How to use
 
-1. Create a new GitHub repository (for example `mapops-hub`).
-2. Add `index.html` from this project to the root of the repo and commit it.
-3. Go to **Settings > Pages** in the repo.
-4. Under **Source**, choose:
-   - Deploy from branch
-   - Branch: `main`
-   - Folder: `/ (root)`
-5. Save. GitHub will build and give you a public URL like:
+1. Open `index.html` in your browser.
+2. Use the form on the right:
+   - Name (required)
+   - URL or path (optional)
+   - Category
+   - Attach file (optional)
+3. Click **Add to hub**.
+4. In the cards list:
+   - **Open link** opens the URL in a new tab
+   - **Open file** downloads or opens the attached file
 
-`https://your-username.github.io/mapops-hub/`
+## GitHub Pages
 
-You can then bookmark that URL as your MapOps internal hub.
-
-If you want to attach a custom domain later, you can:
-
-1. Add a `CNAME` file in the repo with your desired domain.
-2. Point your DNS records from your domain provider to GitHub Pages according to their docs.
+1. Create a repo (for example `mapops-hub`).
+2. Add `index.html` to the root and commit.
+3. Settings → Pages → Source: Deploy from branch → `main` → `/ (root)`.
+4. Save. GitHub will give you a public URL for your hub.

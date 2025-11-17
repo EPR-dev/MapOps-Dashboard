@@ -339,10 +339,24 @@
       font-size: 0.7rem;
     }
 
+    .pill-type {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 0.7rem;
+      color: #cbd5f5;
+    }
+
     .resource-url {
       font-size: 0.72rem;
       color: #93c5fd;
       word-break: break-all;
+    }
+
+    .resource-file {
+      font-size: 0.72rem;
+      color: #bbf7d0;
     }
 
     .resource-actions {
@@ -350,9 +364,11 @@
       justify-content: space-between;
       align-items: center;
       margin-top: 4px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .open-link {
+    .btn-ghost {
       border: none;
       background: transparent;
       color: #a5f3fc;
@@ -478,7 +494,7 @@
           <div class="mapops-dot"></div>
           <h1>MAPOPS HUB</h1>
         </div>
-        <p class="subtitle">One internal cockpit for your tools, links, scripts, maps, and prompts.</p>
+        <p class="subtitle">One internal cockpit for your tools, links, scripts, maps, prompts, and files.</p>
       </div>
       <div class="badge">
         <span class="badge-dot"></span>
@@ -529,7 +545,7 @@
           <div class="panel-title-block">
             <div class="panel-title">Resources</div>
             <div class="panel-sub" id="resourceCountText">
-              Your MapOps links, tools, and references in one place.
+              Your MapOps links, tools, files, and references in one place.
             </div>
           </div>
           <div class="chip" id="activeFilterChip">All tabs · no search</div>
@@ -554,11 +570,11 @@
         <form id="resourceForm" class="form-body">
           <div class="field">
             <label for="nameInput">Name</label>
-            <input id="nameInput" type="text" placeholder="Example: Fused workspace, MapOps site, outbound sheet" required />
+            <input id="nameInput" type="text" placeholder="Example: 30 day LinkedIn PDF, Fused workspace" required />
           </div>
           <div class="field">
-            <label for="urlInput">URL or path</label>
-            <input id="urlInput" type="text" placeholder="https link, Notion page, GitHub repo, internal URL" required />
+            <label for="urlInput">URL or path (optional)</label>
+            <input id="urlInput" type="text" placeholder="https link, Notion page, GitHub repo, internal URL" />
           </div>
           <div class="field">
             <label for="categoryInput">Category</label>
@@ -572,10 +588,14 @@
               <option value="Other">Other</option>
             </select>
           </div>
+          <div class="field">
+            <label for="fileInput">Attach file (optional)</label>
+            <input id="fileInput" type="file" />
+          </div>
 
           <div class="form-footer">
             <p class="hint">
-              Stored locally in this browser using localStorage. Safe to experiment. Repo stays clean.
+              Stored locally in this browser using localStorage. Files are embedded here, so keep them small and important to you.
             </p>
             <button type="submit" class="btn-primary">
               <span>+</span>
@@ -586,7 +606,7 @@
 
         <div class="tagline">
           <span>
-            Tip: Save links to Fused maps, MapOps docs, prompts, GitHub files, Looms, Notion, and CRM views.
+            Tip: Use URLs for large docs. Use file upload for key PDFs and small decks you want one click access to.
           </span>
           <span class="pill">MapOps internal view</span>
         </div>
@@ -595,7 +615,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "mapops_resource_hub_v1";
+    const STORAGE_KEY = "mapops_resource_hub_files_v1";
 
     const defaultResources = [
       {
@@ -603,6 +623,9 @@
         name: "MapOps website",
         url: "https://www.mapops.co/",
         category: "Assets",
+        fileName: "",
+        fileType: "",
+        fileData: "",
         createdAt: Date.now()
       },
       {
@@ -610,6 +633,9 @@
         name: "Fused.io workspace",
         url: "https://fused.io/",
         category: "Tools",
+        fileName: "",
+        fileType: "",
+        fileData: "",
         createdAt: Date.now()
       },
       {
@@ -617,6 +643,9 @@
         name: "Outbound tracking sheet",
         url: "https://your-outbound-sheet-url-here",
         category: "Outbound",
+        fileName: "",
+        fileType: "",
+        fileData: "",
         createdAt: Date.now()
       },
       {
@@ -624,6 +653,9 @@
         name: "Prompt library",
         url: "https://your-prompt-doc-url-here",
         category: "Prompts",
+        fileName: "",
+        fileType: "",
+        fileData: "",
         createdAt: Date.now()
       }
     ];
@@ -667,6 +699,7 @@
     const nameInput = document.getElementById("nameInput");
     const urlInput = document.getElementById("urlInput");
     const categoryInput = document.getElementById("categoryInput");
+    const fileInput = document.getElementById("fileInput");
 
     function renderResources() {
       const search = searchInput.value.trim().toLowerCase();
@@ -675,7 +708,7 @@
           const matchesTab = activeTab === "all" || item.category === activeTab;
           if (!matchesTab) return false;
           if (!search) return true;
-          const target = (item.name + " " + item.url + " " + item.category).toLowerCase();
+          const target = (item.name + " " + (item.url || "") + " " + item.category + " " + (item.fileName || "")).toLowerCase();
           return target.includes(search);
         })
         .slice()
@@ -700,44 +733,103 @@
         const meta = document.createElement("div");
         meta.className = "resource-meta";
 
+        const typePill = document.createElement("span");
+        typePill.className = "pill-type";
+        const hasUrl = !!item.url;
+        const hasFile = !!item.fileData;
+        if (hasUrl && hasFile) {
+          typePill.textContent = "Link + file";
+        } else if (hasUrl) {
+          typePill.textContent = "Link";
+        } else if (hasFile) {
+          typePill.textContent = "File only";
+        } else {
+          typePill.textContent = "Empty";
+        }
+
         const cat = document.createElement("span");
         cat.className = "resource-category";
         cat.textContent = item.category;
 
+        meta.appendChild(typePill);
         meta.appendChild(cat);
 
-        const url = document.createElement("div");
-        url.className = "resource-url";
-        url.textContent = item.url;
+        card.appendChild(title);
+        card.appendChild(meta);
+
+        if (item.url) {
+          const url = document.createElement("div");
+          url.className = "resource-url";
+          url.textContent = item.url;
+          card.appendChild(url);
+        }
+
+        if (item.fileName) {
+          const fileInfo = document.createElement("div");
+          fileInfo.className = "resource-file";
+          fileInfo.textContent = "File: " + item.fileName;
+          card.appendChild(fileInfo);
+        }
 
         const actions = document.createElement("div");
         actions.className = "resource-actions";
 
-        const openBtn = document.createElement("button");
-        openBtn.className = "open-link";
-        openBtn.type = "button";
-        openBtn.innerHTML = "<span>↗</span> Open";
-        openBtn.addEventListener("click", (evt) => {
-          evt.stopPropagation();
-          if (!item.url) return;
-          window.open(item.url, "_blank");
-        });
+        const leftActions = document.createElement("div");
+        leftActions.style.display = "flex";
+        leftActions.style.gap = "6px";
+        leftActions.style.flexWrap = "wrap";
+
+        if (item.url) {
+          const openBtn = document.createElement("button");
+          openBtn.className = "btn-ghost";
+          openBtn.type = "button";
+          openBtn.innerHTML = "<span>↗</span> Open link";
+          openBtn.addEventListener("click", (evt) => {
+            evt.stopPropagation();
+            window.open(item.url, "_blank");
+          });
+          leftActions.appendChild(openBtn);
+        }
+
+        if (item.fileData) {
+          const fileBtn = document.createElement("button");
+          fileBtn.className = "btn-ghost";
+          fileBtn.type = "button";
+          fileBtn.innerHTML = "<span>📄</span> Open file";
+          fileBtn.addEventListener("click", (evt) => {
+            evt.stopPropagation();
+            const a = document.createElement("a");
+            a.href = item.fileData;
+            a.download = item.fileName || "file";
+            a.target = "_blank";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          });
+          leftActions.appendChild(fileBtn);
+        }
+
+        actions.appendChild(leftActions);
 
         const metaRight = document.createElement("span");
         metaRight.className = "badge-mini";
         metaRight.textContent = "Saved in this browser";
-
-        actions.appendChild(openBtn);
         actions.appendChild(metaRight);
 
-        card.appendChild(title);
-        card.appendChild(meta);
-        card.appendChild(url);
         card.appendChild(actions);
 
         card.addEventListener("click", () => {
-          if (!item.url) return;
-          window.open(item.url, "_blank");
+          if (item.url) {
+            window.open(item.url, "_blank");
+          } else if (item.fileData) {
+            const a = document.createElement("a");
+            a.href = item.fileData;
+            a.download = item.fileName || "file";
+            a.target = "_blank";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
         });
 
         resourcesList.appendChild(card);
@@ -780,23 +872,50 @@
       const name = nameInput.value.trim();
       const url = urlInput.value.trim();
       const category = categoryInput.value || "Other";
-      if (!name || !url) return;
+      const file = fileInput.files[0];
 
-      const item = {
-        id: crypto.randomUUID(),
-        name,
-        url,
-        category,
-        createdAt: Date.now()
-      };
+      if (!name && !url && !file) return;
+      if (!name) return;
 
-      resources.push(item);
-      saveResources(resources);
-      renderResources();
-
-      resourceForm.reset();
-      categoryInput.value = category;
-      nameInput.focus();
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const item = {
+            id: crypto.randomUUID(),
+            name,
+            url: url || "",
+            category,
+            fileName: file.name,
+            fileType: file.type,
+            fileData: e.target.result,
+            createdAt: Date.now()
+          };
+          resources.push(item);
+          saveResources(resources);
+          renderResources();
+          resourceForm.reset();
+          categoryInput.value = category;
+          nameInput.focus();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const item = {
+          id: crypto.randomUUID(),
+          name,
+          url: url || "",
+          category,
+          fileName: "",
+          fileType: "",
+          fileData: "",
+          createdAt: Date.now()
+        };
+        resources.push(item);
+        saveResources(resources);
+        renderResources();
+        resourceForm.reset();
+        categoryInput.value = category;
+        nameInput.focus();
+      }
     });
 
     renderResources();
